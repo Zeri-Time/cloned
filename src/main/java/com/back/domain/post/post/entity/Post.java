@@ -19,8 +19,8 @@ import static jakarta.persistence.FetchType.LAZY;
 @Getter
 @Entity
 public class Post extends BaseEntity {
-    private String subject;
-    private  String body;
+    private String title;
+    private  String content;
 
     /**
      * mappedBy = "post" : 관계의 주인은 PostComment.post (자식이 FK 보유)
@@ -33,13 +33,13 @@ public class Post extends BaseEntity {
     private List<PostComment> comments = new ArrayList<>();
 
     public Post(String title, String content) {
-        this.subject = title;
-        this.body = content;
+        this.title = title;
+        this.content = content;
     }
 
     public void modify(String title, String content) {
-        this.subject = title;
-        this.body = content;
+        this.title = title;
+        this.content = content;
     }
 
     /**

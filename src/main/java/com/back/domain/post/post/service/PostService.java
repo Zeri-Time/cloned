@@ -13,14 +13,8 @@ import java.util.List;
 public class PostService {
     private final PostRepository postRepository;
 
-//    public Post findByTitle(String title) {
-//        return postRepository.findByTitle(title).orElseThrow(
-//                () -> new RuntimeException("게시글이 존재하지 않습니다.")
-//        );
-//    }
-
-    public Post findBySubject(String title) {
-        return postRepository.findBySubject(title).orElseThrow(
+    public Post findByTitle(String title) {
+        return postRepository.findByTitle(title).orElseThrow(
                 () -> new RuntimeException("게시글이 존재하지 않습니다.")
         );
     }
