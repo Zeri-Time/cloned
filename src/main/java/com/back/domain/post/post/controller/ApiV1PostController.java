@@ -18,6 +18,7 @@ import java.util.List;
 public class ApiV1PostController {
     private final PostService postService;
 
+    @Transactional(readOnly = true)
     @GetMapping
     public List<PostDto> getItems() {
         List<Post> items = postService.getList();
@@ -28,6 +29,7 @@ public class ApiV1PostController {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     @GetMapping("/{id}")
     public PostDto getItem(@PathVariable Long id) {
         Post item = postService.findById(id);
