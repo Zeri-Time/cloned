@@ -12,6 +12,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
 @ActiveProfiles("test") // 테스트 환경에서는 test 프로파일을 활성화합니다.
 @SpringBootTest // 스프링부트 테스트 클래스임을 나타냅니다.
@@ -36,6 +37,7 @@ public class ApiV1PostControllerTest {
                                             "content": "내용"
                                         }
                                         """)
-                );
+                )
+                .andDo(print()); // 응답을 출력합니다.
     }
 }
