@@ -8,7 +8,7 @@ public record PostWriteReqBody(
         @Size(min = 2, max = 100)
         String title,
         @NotBlank
-        @Size(min = 2, max = 100)
+        @Size(min = 2, max = 2000)
         String content
 ){}
 
