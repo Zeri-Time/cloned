@@ -66,6 +66,33 @@ public class ApiV1PostControllerTest {
 
     }
 
+    //글쓰기 제목 누락 테스트
+    @Test
+    @DisplayName("글 쓰기 404 - 제목 누락")
+    void t7() throws Exception {
+        //요청을 보냅니다.
+        ResultActions resultActions = mvc
+                .perform(
+                        post("/api/v1/posts")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("""
+                                        {
+                                            "title": "",
+                                            "content": "내용"
+                                        }
+                                        """)
+                )
+                .andDo(print()); // 응답을 출력합니다.
+
+        // 400 BadRequest 상태코드 검증
+        resultActions
+                .andExpect(handler().handlerType(ApiV1PostController.class))
+                .andExpect(handler().methodName("write"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.resultCode").value("400-1"))
+                .andExpect(jsonPath("$.msg").value("제목을 필수 값입니다."));
+    }
+
     //글 수정 테스트
     @Test
     @DisplayName("글 수정")
@@ -158,7 +185,7 @@ public class ApiV1PostControllerTest {
                 )
                 .andDo(print()); // 응답을 출력합니다.
 
-        // 404 Ok 상태코드 검증
+        // 404 NotFound상태코드 검증
         resultActions
                 .andExpect(status().isNotFound())
                 .andExpect(handler().handlerType(ApiV1PostController.class))
