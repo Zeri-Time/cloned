@@ -44,6 +44,12 @@ public class HomeController {
                         console.log(data);
                         console.log(data[1].title);
                       });
+                      
+                      fetch("http://localhost:8080/api/v1/posts/1")
+                        .then(response => response.json())
+                        .then(data => {
+                          console.log(data);
+                        });
                     </script>
                 """;
     }
