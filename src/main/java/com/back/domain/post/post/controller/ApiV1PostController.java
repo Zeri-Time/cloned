@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+
 @RestController // @Controller + @ResponseBody
 @RequestMapping("/api/v1/posts")
 @RequiredArgsConstructor
@@ -20,7 +22,7 @@ public class ApiV1PostController {
     private final PostService postService;
 
     @Transactional(readOnly = true)
-    @GetMapping
+    @GetMapping(produces = APPLICATION_JSON_VALUE)
     public List<PostDto> getItems() {
         List<Post> items = postService.getList();
 
@@ -31,7 +33,7 @@ public class ApiV1PostController {
     }
 
     @Transactional(readOnly = true)
-    @GetMapping("/{id}")
+    @GetMapping(value="/{id}", produces = APPLICATION_JSON_VALUE)
     public PostDto getItem(@PathVariable Long id) {
         Post item = postService.findById(id);
 
