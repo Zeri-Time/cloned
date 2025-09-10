@@ -30,4 +30,21 @@ public class HomeController {
                 </div>
                 """.formatted(localHost.getHostName(), localHost.getHostAddress());
     }
+
+    @GetMapping(value="/test/fetchPosts", produces = TEXT_HTML_VALUE)
+    public String testFetchPosts() {
+
+        return """
+                    <script>
+                    console.clear();
+    
+                    fetch("http://localhost:8080/api/v1/posts")
+                      .then(response => response.json())
+                      .then(data => {
+                        console.log(data);
+                        console.log(data[1].title);
+                      });
+                    </script>
+                """;
+    }
 }
