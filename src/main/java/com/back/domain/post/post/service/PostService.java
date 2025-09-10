@@ -66,4 +66,8 @@ public class PostService {
     public Optional<Post> findLatest() {
         return postRepository.findFirstByOrderByIdDesc();
     }
+
+    public PostComment writeComment(Post post, String content) {
+        return post.addComment(content);
+    }
 }
