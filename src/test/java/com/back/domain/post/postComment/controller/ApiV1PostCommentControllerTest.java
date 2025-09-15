@@ -1,3 +1,4 @@
+
 package com.back.domain.post.postComment.controller;
 
 import com.back.domain.post.post.entity.Post;
@@ -56,6 +57,7 @@ public class ApiV1PostCommentControllerTest {
                 .andExpect(jsonPath("$.id").value(postComment.getId()))
                 .andExpect(jsonPath("$.createDate").value(Matchers.startsWith(postComment.getCreateDate().toString().substring(0, 20))))
                 .andExpect(jsonPath("$.modifyDate").value(Matchers.startsWith(postComment.getModifyDate().toString().substring(0, 20))))
+                .andExpect(jsonPath("$.authorName").value(postComment.getAuthor().getNickname()))
                 .andExpect(jsonPath("$.content").value(postComment.getContent()));
     }
 
@@ -88,6 +90,7 @@ public class ApiV1PostCommentControllerTest {
                     .andExpect(jsonPath("$[%d].id".formatted(i)).value(postComment.getId()))
                     .andExpect(jsonPath("$[%d].createDate".formatted(i)).value(Matchers.startsWith(postComment.getCreateDate().toString().substring(0, 20))))
                     .andExpect(jsonPath("$[%d].modifyDate".formatted(i)).value(Matchers.startsWith(postComment.getModifyDate().toString().substring(0, 20))))
+                    .andExpect(jsonPath("$[%d].authorName".formatted(i)).value(postComment.getAuthor().getNickname()))
                     .andExpect(jsonPath("$[%d].content".formatted(i)).value(postComment.getContent()));
         }
     }
@@ -175,6 +178,7 @@ public class ApiV1PostCommentControllerTest {
                 .andExpect(jsonPath("$.data.id").value(postComment.getId()))
                 .andExpect(jsonPath("$.data.createDate").value(Matchers.startsWith(postComment.getCreateDate().toString().substring(0, 20))))
                 .andExpect(jsonPath("$.data.modifyDate").value(Matchers.startsWith(postComment.getModifyDate().toString().substring(0, 20))))
+                .andExpect(jsonPath("$.data.authorName").value(postComment.getAuthor().getNickname()))
                 .andExpect(jsonPath("$.data.content").value("내용 new"));
     }
 }
