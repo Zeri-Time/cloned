@@ -1,4 +1,3 @@
-
 package com.back.domain.post.postComment.controller;
 
 import com.back.domain.member.member.entity.Member;
@@ -9,6 +8,8 @@ import com.back.domain.post.postComment.dto.PostCommentDto;
 import com.back.domain.post.postComment.dto.PostCommentModifyReqBody;
 import com.back.domain.post.postComment.dto.PostCommentWriteReqBody;
 import com.back.domain.post.postComment.entity.PostComment;
+import com.back.global.Rq.Rq;
+import com.back.global.exception.ServiceException;
 import com.back.global.rsData.RsData;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -26,6 +27,7 @@ import java.util.List;
 public class ApiV1PostCommentController {
     private final PostService postService;
     private final MemberService memberService;
+    private final Rq rq;
 
     @Transactional(readOnly = true)
     @GetMapping
@@ -63,9 +65,15 @@ public class ApiV1PostCommentController {
             @PathVariable long postId,
             @PathVariable long id
     ) {
+        Member actor = rq.getActor();
+
         Post post = postService.findById(postId);
 
         PostComment postComment = post.findCommentById(id).get();
+
+        if (!actor.equals(postComment.getAuthor())) {
+            throw new ServiceException("403-1", "댓글 삭제 권한이 없습니다.");
+        }
 
         postService.deleteComment(post, postComment);
 
@@ -80,9 +88,15 @@ public class ApiV1PostCommentController {
             @PathVariable long id,
             @Valid @RequestBody PostCommentModifyReqBody reqBody
     ) {
+        Member actor = rq.getActor();
+
         Post post = postService.findById(postId);
 
         PostComment postComment = post.findCommentById(id).get();
+
+        if (!actor.equals(postComment.getAuthor())) {
+            throw new ServiceException("403-1", "댓글 수정 권한이 없습니다.");
+        }
 
         postService.modifyComment(postComment, reqBody.content());
 
@@ -99,10 +113,11 @@ public class ApiV1PostCommentController {
             @PathVariable long postId,
             @Valid @RequestBody PostCommentWriteReqBody reqBody
     ) {
+        Member actor = rq.getActor();
+
         Post post = postService.findById(postId);
 
-        Member author = memberService.findByUsername("user1").get();
-        PostComment postComment = postService.writeComment(author, post, reqBody.content());
+        PostComment postComment = postService.writeComment(actor, post, reqBody.content());
 
         // 트렌잭션 끝난 후 수행되야 하는 더티체킹 및 여가지 작업들을 지금 당장 수행시킴
         postService.flush();
