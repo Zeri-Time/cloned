@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Optional;
 
 @Component
@@ -25,6 +26,7 @@ public class Rq {
         String headerAuthorization = getHeader("Authorization", "");
 
         String apiKey;
+        String accessToken;
 
         // headerAuthorization이 존재한다면
         if (!headerAuthorization.isBlank()) {
@@ -32,19 +34,67 @@ public class Rq {
                 throw new ServiceException("401-2", "인증 정보가 올바르지 않습니다.");
             }
 
-            apiKey = headerAuthorization.substring("Bearer ".length()).trim();
-        } else { // headerAuthorization 존재하지 않는다면 쿠키에서 apiKey를 가지고 오기
+            // ["Bearer", apiKey, accessToken]
+            String[] headerAuthorizations =  headerAuthorization.split(" ", 3);
+
+            apiKey = headerAuthorizations[1];
+            accessToken = headerAuthorizations.length == 3 ? headerAuthorizations[2] : "";
+        } else { // headerAuthorization 존재하지 않는다면 쿠키에서 정보가지고 오기
             apiKey = getCookieValue("apiKey", "");
+            accessToken = getCookieValue("accessToken", "");
         }
 
-        if (apiKey.isBlank())  throw new ServiceException("401-1", "로그인 후 사용해주세요.");
+        /*
+            검증
+           1. accessToken, apiKey(refreshToken)가지고 있는지 검증
+        */
 
+        if (apiKey.isBlank()) throw new ServiceException("401-1", "로그인 후 사용해주세요.");
 
-        Member member = memberService
-                .findByApiKey(apiKey)
-                .orElseThrow(() -> new ServiceException("401-3", "회원을 찾을 수 없습니다."));
+        Member member = null;
+        boolean isAccessTokenExists = !accessToken.isBlank();
+        boolean isAccessTokenValid = false;
+
+        if (isAccessTokenExists) {
+            Map<String, Object> payload = memberService.payload(accessToken);
+
+            if (payload != null) {
+                long id = ((Number) payload.get("id")).longValue();
+                String username = (String) payload.get("username");
+                String nickname = (String) payload.get("nickname");
+                member = new Member(id, username, nickname);
+
+                // 토큰 유효성 검증 성공
+                isAccessTokenValid = true;
+            }
+        }
+
+        if (member == null) {
+            member = memberService.findByApiKey(apiKey)
+                    .orElseThrow(() -> new ServiceException("401-3", "회원을 찾을 수 없습니다."));
+        }
+
+        // 토큰 존재하고, 토큰 유효성 검증 실패 했을 때
+        if (isAccessTokenExists && !isAccessTokenValid) {
+            // apiKey(refresh token)을 이용한 accessToken 재발급
+            String actorAccessToken = memberService.genAccessToken(member);
+
+            setCookie("accessToken", actorAccessToken);
+            // 비교용으로 전달
+            setHeader("Authorization", actorAccessToken);
+        }
 
         return member;
+    }
+
+    private void setHeader(String name, String value) {
+        if (value == null) value = "";
+
+        if (value.isBlank()) {
+            req.removeAttribute(name);
+        } else {
+            resp.setHeader(name, value);
+        }
     }
 
     private String getHeader(String name, String defaultValue) {
