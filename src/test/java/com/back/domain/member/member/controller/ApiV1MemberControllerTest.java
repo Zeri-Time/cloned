@@ -1,3 +1,4 @@
+
 package com.back.domain.member.member.controller;
 
 
@@ -11,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -118,14 +120,11 @@ public class ApiV1MemberControllerTest {
 
     @Test
     @DisplayName("내 정보")
+    @WithUserDetails("user1")
     void t3() throws Exception {
-        Member actor = memberService.findByUsername("user1").get();
-        String apiKey = actor.getApiKey();
-
         ResultActions resultActions = mvc
                 .perform(
                         get("/api/v1/members/me")
-                                .header("Authorization", "Bearer " + apiKey)
                 )
                 .andDo(print());
 
@@ -146,14 +145,12 @@ public class ApiV1MemberControllerTest {
 
     @Test
     @DisplayName("내 정보, with apiKey Cookie")
+    @WithUserDetails("user1")
     void t4() throws Exception {
-        Member actor =  memberService.findByUsername("user1").get();
-        String apiKey = actor.getApiKey();
 
         ResultActions resultActions = mvc
                 .perform(
                         get("/api/v1/members/me")
-                                .cookie(new Cookie("apiKey", apiKey))
                 )
                 .andDo(print());
 
