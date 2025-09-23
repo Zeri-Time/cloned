@@ -9,10 +9,12 @@ import com.back.domain.member.member.service.MemberService;
 import com.back.global.Rq.Rq;
 import com.back.global.exception.ServiceException;
 import com.back.global.rsData.RsData;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -24,7 +26,9 @@ public class ApiV1MemberController {
     private final MemberService memberService;
     private final Rq rq;
 
+    @Transactional
     @PostMapping
+    @Operation(summary = "회원가입")
     public RsData<MemberDto> join(@Valid @RequestBody MemberJoinReqBody reqBody) {
         Member member = memberService.join(reqBody.username(), reqBody.password(), reqBody.nickname());
 
@@ -35,16 +39,19 @@ public class ApiV1MemberController {
         );
     }
 
+    @Transactional
     @PostMapping("/login")
+    @Operation(summary = "로그인")
     public RsData<MemberLoginResBody> login(
             @Valid @RequestBody MemberLoginReqBody reqBody
     ) {
         Member member = memberService.findByUsername(reqBody.username())
                 .orElseThrow(() -> new ServiceException("401-1", "존재하지 않는 회원입니다."));
 
-        if (!member.getPassword().equals(reqBody.password())) {
-            throw new ServiceException("401-2", "비밀번호가 일치하지 않습니다.");
-        }
+        memberService.checkPassword(
+                member,
+                reqBody.password()
+        );
 
         String accessToken = memberService.genAccessToken(member);
 
@@ -63,18 +70,24 @@ public class ApiV1MemberController {
 
     }
 
+    @Transactional(readOnly = true)
     @GetMapping("/me")
+    @Operation(summary = "내 정보")
     public RsData<MemberDto> me() {
         Member actor = rq.getActor();
+        // 실시간성을 보장하기위해 DB 조회
+        Member member  = memberService.findById(actor.getId()).get();
 
         return new RsData(
                 "200-1",
                 "%s님 정보입니다.".formatted(actor.getNickname()),
-                new MemberDto(actor)
+                new MemberDto(member)
         );
     }
 
+    @Transactional
     @DeleteMapping("/logout")
+    @Operation(summary = "로그아웃")
     public RsData<Void> logout() {
 
         rq.deleteCookie("apiKey");

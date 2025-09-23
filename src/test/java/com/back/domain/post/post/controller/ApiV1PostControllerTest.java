@@ -1,3 +1,4 @@
+
 package com.back.domain.post.post.controller;
 
 import com.back.domain.member.member.entity.Member;
@@ -188,7 +189,7 @@ public class ApiV1PostControllerTest {
         resultActions
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.resultCode").value("401-1"))
-                .andExpect(jsonPath("$.msg").value("로그인 후 사용해주세요."));
+                .andExpect(jsonPath("$.msg").value("로그인 후 이용해주세요."));
     }
 
     @Test
